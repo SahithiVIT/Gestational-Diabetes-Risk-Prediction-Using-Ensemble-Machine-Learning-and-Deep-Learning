@@ -3,11 +3,11 @@ import pandas as pd
 import numpy as np
 
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
 from sklearn.impute import SimpleImputer
-from sklearn.feature_selection import SelectKBest, f_classif
-from sklearn.neural_network import MLPClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.calibration import CalibratedClassifierCV
 from imblearn.over_sampling import SMOTE
+
 
 st.set_page_config(
     page_title="GDM Risk Prediction",
@@ -16,7 +16,11 @@ st.set_page_config(
 )
 
 st.title("🤰 Gestational Diabetes Risk Prediction")
-st.write("Enter patient clinical details to estimate GDM risk.")
+
+st.write(
+    "Enter patient clinical details to estimate "
+    "Gestational Diabetes Mellitus (GDM) risk."
+)
 
 TARGET = "Class Label(GDM /Non GDM)"
 
@@ -24,15 +28,21 @@ TARGET = "Class Label(GDM /Non GDM)"
 @st.cache_resource
 def train_model():
 
-    df = pd.read_excel("Gestational Diabetic Dat Set.xlsx")
+    df = pd.read_excel(
+        "Gestational Diabetic Dat Set.xlsx"
+    )
 
-    X_df = df.drop(["Case Number", TARGET], axis=1)
+    X = df.drop(
+        ["Case Number", TARGET],
+        axis=1
+    )
+
     y = df[TARGET]
 
-    feature_names = X_df.columns.tolist()
+    feature_names = X.columns.tolist()
 
     X_train, X_test, y_train, y_test = train_test_split(
-        X_df,
+        X,
         y,
         test_size=0.2,
         random_state=42,
@@ -43,10 +53,6 @@ def train_model():
 
     X_train = imputer.fit_transform(X_train)
 
-    scaler = StandardScaler()
-
-    X_train = scaler.fit_transform(X_train)
-
     smote = SMOTE(random_state=42)
 
     X_train, y_train = smote.fit_resample(
@@ -54,76 +60,69 @@ def train_model():
         y_train
     )
 
-    selector = SelectKBest(
-        score_func=f_classif,
-        k=10
+    rf = RandomForestClassifier(
+        n_estimators=300,
+        max_depth=8,
+        min_samples_leaf=3,
+        random_state=42
     )
 
-    X_train = selector.fit_transform(
-        X_train,
-        y_train
-    )
-
-    model = MLPClassifier(
-        hidden_layer_sizes=(128, 64, 32),
-        max_iter=1000,
-        random_state=42,
-        early_stopping=True
+    model = CalibratedClassifierCV(
+        rf,
+        method="sigmoid",
+        cv=5
     )
 
     model.fit(X_train, y_train)
 
-    return (
-        model,
-        imputer,
-        scaler,
-        selector,
-        feature_names
-    )
+    return model, imputer, feature_names
 
 
-model, imputer, scaler, selector, feature_names = train_model()
+model, imputer, feature_names = train_model()
 
 
-st.subheader("🩺 Patient Details")
+st.subheader("🩺 Enter Patient Details")
+
 
 with st.form("patient_form"):
 
     age = st.number_input(
         "Age",
-        min_value=18.0,
-        max_value=60.0,
-        value=25.0
+        18.0,
+        60.0,
+        25.0
     )
 
     preg = st.number_input(
         "Number of Pregnancies",
-        min_value=0.0,
-        max_value=15.0,
-        value=1.0
+        0.0,
+        15.0,
+        1.0
     )
 
     gest = st.number_input(
         "Gestation",
-        min_value=0.0,
-        value=20.0
+        0.0,
+        50.0,
+        20.0
     )
 
     bmi = st.number_input(
         "BMI",
-        min_value=10.0,
-        max_value=60.0,
-        value=25.0
+        10.0,
+        60.0,
+        22.0
     )
 
     hdl = st.number_input(
         "HDL",
-        min_value=0.0,
-        value=50.0
+        0.0,
+        150.0,
+        55.0
     )
 
     family = st.selectbox(
-        "Family History",
+        "Family History of Diabetes",
         ["No", "Yes"]
     )
 
@@ -143,29 +142,31 @@ with st.form("patient_form"):
     )
 
     sys_bp = st.number_input(
-        "Systolic BP",
-        min_value=50.0,
-        max_value=250.0,
-        value=120.0
+        "Systolic Blood Pressure",
+        50.0,
+        250.0,
+        110.0
     )
 
     dia_bp = st.number_input(
-        "Diastolic BP",
-        min_value=30.0,
-        max_value=150.0,
-        value=80.0
+        "Diastolic Blood Pressure",
+        30.0,
+        150.0,
+        70.0
     )
 
     ogtt = st.number_input(
         "OGTT",
-        min_value=0.0,
-        value=120.0
+        0.0,
+        400.0,
+        100.0
     )
 
     hemo = st.number_input(
         "Hemoglobin",
-        min_value=0.0,
-        value=12.0
+        0.0,
+        25.0,
+        12.0
     )
 
     sedentary = st.selectbox(
@@ -203,7 +204,6 @@ if predict:
         1 if prediabetes == "Yes" else 0
     ]
 
-    # Create dataframe using exact training column order
     user_data = pd.DataFrame(
         [values],
         columns=feature_names
@@ -211,13 +211,11 @@ if predict:
 
     user_data = imputer.transform(user_data)
 
-    user_data = scaler.transform(user_data)
+    probabilities = model.predict_proba(user_data)[0]
 
-    user_data = selector.transform(user_data)
+    class_index = list(model.classes_).index(1)
 
-    probability = model.predict_proba(
-        user_data
-    )[0][1]
+    probability = probabilities[class_index]
 
     st.subheader("📊 Prediction Result")
 
@@ -229,9 +227,9 @@ if predict:
 
         st.success("✅ Lower GDM Risk")
 
-    st.write(
-        f"Estimated GDM Risk Score: "
-        f"**{probability * 100:.2f}%**"
+    st.metric(
+        "Estimated GDM Risk Score",
+        f"{probability * 100:.2f}%"
     )
 
     st.progress(float(probability))
@@ -246,6 +244,5 @@ st.divider()
 
 st.caption(
     "⚠️ Educational and research purposes only. "
-    "Consult a qualified healthcare professional "
-    "for medical evaluation."
+    "Consult a healthcare professional for medical evaluation."
 )
