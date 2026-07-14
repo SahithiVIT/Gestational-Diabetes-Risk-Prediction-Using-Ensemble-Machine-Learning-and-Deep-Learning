@@ -1,34 +1,47 @@
-# 🤰 Gestational Diabetes Mellitus (GDM) Prediction
+# 🤰 Gestational Diabetes Risk Prediction Using Machine Learning and Deep Learning
 
-An intelligent **Machine Learning, Deep Learning, and Ensemble Learning system** designed to predict **Gestational Diabetes Mellitus (GDM)** using patient health and clinical features.
+An interactive Machine Learning, Deep Learning, and Ensemble Learning project designed to predict the risk of **Gestational Diabetes Mellitus (GDM)** using patient clinical and health-related features.
 
-The project compares multiple classification algorithms, Deep Belief Network (DBN), and Stacking Ensemble techniques to evaluate their performance in GDM prediction.
+The project compares multiple classification models and provides a deployed Streamlit web application for interactive patient risk prediction.
+
+---
+
+## 🌐 Live Application
+
+🚀 **Try the deployed GDM Prediction App:**
+
+https://bq6ncgt7rr47yvnyjc8pxn.streamlit.app/
+
+Users can enter patient clinical details and receive an instant GDM risk prediction.
 
 ---
 
 ## 📌 Project Overview
 
-Gestational Diabetes Mellitus is a type of diabetes that can occur during pregnancy.
+Gestational Diabetes Mellitus is a condition that can occur during pregnancy and is associated with increased blood glucose levels.
 
-This project builds a predictive system that analyzes patient features such as:
+This project analyzes clinical features such as:
 
-* Age
-* Number of Pregnancies
-* Gestation
-* BMI
-* HDL
-* Family History
-* Unexplained Prenatal Loss
-* Large Child History
-* PCOS
-* Systolic Blood Pressure
-* Diastolic Blood Pressure
-* OGTT
-* Hemoglobin
-* Sedentary Lifestyle
-* Prediabetes
+- Age
+- Number of Pregnancies
+- Gestation
+- BMI
+- HDL
+- Family History
+- Unexplained Prenatal Loss
+- Large Child History
+- PCOS
+- Systolic Blood Pressure
+- Diastolic Blood Pressure
+- OGTT
+- Hemoglobin
+- Sedentary Lifestyle
+- Prediabetes
 
-The system predicts whether a patient is likely to have **GDM or Non-GDM**.
+The system predicts:
+
+- ⚠️ GDM Detected
+- ✅ No GDM Detected
 
 ---
 
@@ -51,7 +64,7 @@ SMOTE Class Balancing
    ↓
 Feature Selection
    ↓
-Multiple ML Model Training
+Machine Learning Model Training
    ↓
 Deep Learning Models
    ↓
@@ -63,31 +76,31 @@ Performance Comparison
    ↓
 ROC Curve Analysis
    ↓
-Patient GDM Prediction
+Interactive Patient Prediction
+   ↓
+Streamlit Deployment
 ```
 
 ---
 
 ## 🧠 Models Implemented
 
-The following Machine Learning and Deep Learning models were compared:
-
-| Model                  | Description                                 |
-| ---------------------- | ------------------------------------------- |
-| 🌲 Random Forest       | Ensemble of multiple decision trees         |
-| 🌳 Extra Trees         | Highly randomized tree-based ensemble       |
-| ⚡ XGBoost              | Optimized gradient boosting algorithm       |
-| 💡 LightGBM            | Fast gradient boosting framework            |
-| 🐱 CatBoost            | Advanced boosting algorithm                 |
-| 📐 SVM                 | Support Vector Machine classifier           |
-| 👥 KNN                 | K-Nearest Neighbors classifier              |
-| 🌿 Decision Tree       | Tree-based classification model             |
-| 📈 Gradient Boosting   | Sequential boosting algorithm               |
-| 🔄 AdaBoost            | Adaptive boosting classifier                |
-| 📊 Logistic Regression | Linear classification model                 |
-| 🧠 MLP                 | Multi-Layer Perceptron Neural Network       |
-| 🔗 DBN                 | Deep Belief Network using stacked RBMs      |
-| 🏆 Stacking Ensemble   | Combination of RF, Extra Trees, and XGBoost |
+| Model | Description |
+|---|---|
+| Random Forest | Ensemble of multiple decision trees |
+| Extra Trees | Randomized tree-based ensemble |
+| XGBoost | Optimized gradient boosting algorithm |
+| LightGBM | Fast gradient boosting framework |
+| CatBoost | Advanced boosting algorithm |
+| SVM | Support Vector Machine classifier |
+| KNN | K-Nearest Neighbors |
+| Decision Tree | Tree-based classification |
+| Gradient Boosting | Sequential boosting model |
+| AdaBoost | Adaptive boosting classifier |
+| Logistic Regression | Linear classification model |
+| MLP | Multi-Layer Perceptron Neural Network |
+| DBN | Deep Belief Network using stacked RBMs |
+| Stacking Ensemble | RF, Extra Trees and XGBoost ensemble |
 
 ---
 
@@ -101,7 +114,7 @@ Extra Trees ───────┼──► Logistic Regression ──► Fina
 XGBoost ───────────┘
 ```
 
-The predictions from multiple base models are combined using **Logistic Regression as the meta-model**.
+The base model predictions are combined using Logistic Regression as the meta-model.
 
 ---
 
@@ -123,77 +136,38 @@ GDM / Non-GDM
 
 ---
 
-## 🛠️ Technologies Used
-
-### Programming Language
-
-* Python
-
-### Data Processing
-
-* Pandas
-* NumPy
-
-### Machine Learning
-
-* Scikit-learn
-* Imbalanced-learn
-* XGBoost
-* LightGBM
-* CatBoost
-
-### Data Visualization
-
-* Matplotlib
-* Seaborn
-
-### Development Environment
-
-* Jupyter Notebook
-* Google Colab
-
----
-
 ## ⚙️ Data Preprocessing
 
-### 1️⃣ Missing Value Handling
+### Missing Value Handling
 
-Missing numerical values are handled using **Mean Imputation**.
+Missing numerical values are handled using Mean Imputation.
 
 ```python
-imputer = SimpleImputer(strategy='mean')
+imputer = SimpleImputer(strategy="mean")
 X = imputer.fit_transform(X)
 ```
 
----
+### Feature Standardization
 
-### 2️⃣ Feature Standardization
-
-`StandardScaler` is used to bring features to a common scale.
+StandardScaler is used to bring numerical features to a common scale.
 
 ```python
 scaler = StandardScaler()
 X = scaler.fit_transform(X)
 ```
 
----
+### Class Balancing Using SMOTE
 
-### 3️⃣ Class Balancing Using SMOTE
-
-SMOTE generates synthetic samples for the minority class.
+SMOTE generates synthetic minority-class samples to reduce class imbalance.
 
 ```python
 smote = SMOTE(random_state=42)
 X, y = smote.fit_resample(X, y)
 ```
 
-This reduces model bias towards the majority class.
+### Feature Selection
 
----
-
-### 4️⃣ Feature Selection
-
-The top **10 informative features** are selected using the ANOVA F-test.
+The top 10 informative features are selected using the ANOVA F-test.
 
 ```python
 selector = SelectKBest(score_func=f_classif, k=10)
@@ -202,195 +176,208 @@ X = selector.fit_transform(X, y)
 
 ---
 
-## 📊 Model Evaluation Metrics
+## 📊 Model Evaluation
 
-Models are evaluated using **5-Fold Cross Validation**.
+Models are evaluated using 5-Fold Cross Validation.
 
-The following metrics are used:
+The evaluation metrics include:
 
-| Metric    | Purpose                              |
-| --------- | ------------------------------------ |
-| Accuracy  | Overall prediction correctness       |
-| Precision | Accuracy of positive predictions     |
-| Recall    | Ability to identify GDM patients     |
-| F1 Score  | Balance between Precision and Recall |
-| ROC-AUC   | Overall classification capability    |
+| Metric | Purpose |
+|---|---|
+| Accuracy | Overall prediction correctness |
+| Precision | Accuracy of positive predictions |
+| Recall | Ability to identify GDM cases |
+| F1 Score | Balance between precision and recall |
+| ROC-AUC | Overall classification discrimination |
 
-For medical prediction, **Recall is especially important because missing a GDM patient can be more serious than a false positive**.
-
----
-
-## 📈 Performance Comparison
-
-The project generates comparison graphs for:
-
-* 📊 Accuracy
-* 🎯 Precision
-* 🔍 Recall
-* ⚖️ F1 Score
-* 📈 ROC Curve
-
-These visualizations help identify the best-performing model.
+Recall is particularly important in risk-screening applications because missed positive cases may require further attention.
 
 ---
 
-## 🔬 ROC Curve
+## 📈 Performance Analysis
 
-The ROC curve evaluates the relationship between:
+The project compares models using:
 
-```text
-True Positive Rate (TPR)
-          VS
-False Positive Rate (FPR)
-```
+- Accuracy
+- Precision
+- Recall
+- F1 Score
+- ROC-AUC
+- ROC Curve
 
-A higher **Area Under the Curve (AUC)** indicates better model discrimination.
+These metrics help compare the predictive performance of different models.
 
 ---
 
-## 🩺 Patient Prediction
+## 🌐 Interactive Streamlit Web Application
 
-The system accepts patient clinical information as input.
+The trained prediction pipeline is integrated into an interactive Streamlit application.
 
-```text
-Age
-Number of Pregnancies
-Gestation
-BMI
-HDL
-Family History
-Prenatal Loss
-Large Child History
-PCOS
-Systolic BP
-Diastolic BP
-OGTT
-Hemoglobin
-Sedentary Lifestyle
-Prediabetes
-```
-
-The patient data undergoes the same preprocessing pipeline:
+### Application Flow
 
 ```text
-Patient Input
-     ↓
-Missing Value Handling
-     ↓
-Standardization
-     ↓
-Feature Selection
-     ↓
+User Opens Web Application
+          ↓
+Enters Patient Details
+          ↓
+Clicks "Predict GDM"
+          ↓
+Data Preprocessing
+          ↓
 MLP Neural Network
-     ↓
-Prediction
+          ↓
+GDM Risk Prediction
+          ↓
+Prediction Result Displayed
 ```
 
-### Possible Results
+### Live App
 
-```text
-Result: GDM Detected
-```
+https://bq6ncgt7rr47yvnyjc8pxn.streamlit.app/
 
-or
+---
 
-```text
-Result: No GDM
-```
+## ✨ Key Features
+
+- Multiple Machine Learning Model Comparison
+- MLP Neural Network
+- Deep Belief Network
+- Stacking Ensemble Learning
+- SMOTE Class Balancing
+- ANOVA-Based Feature Selection
+- 5-Fold Cross Validation
+- ROC-AUC Evaluation
+- Interactive Patient Input
+- GDM Risk Probability
+- Real-Time Prediction
+- Streamlit Web Deployment
+
+---
+
+## 🛠️ Technologies Used
+
+### Programming Language
+
+- Python
+
+### Machine Learning
+
+- Scikit-learn
+- Imbalanced-learn
+- XGBoost
+- LightGBM
+- CatBoost
+
+### Data Processing
+
+- Pandas
+- NumPy
+
+### Data Visualization
+
+- Matplotlib
+- Seaborn
+
+### Web Application
+
+- Streamlit
+
+### Development Tools
+
+- Jupyter Notebook
+- Google Colab
+- GitHub
 
 ---
 
 ## 📂 Project Structure
 
 ```text
-Gestational-Diabetes-Prediction/
+Gestational-Diabetes-Risk-Prediction/
 │
-├── Gestational_Diabetes_Prediction.ipynb
+├── app.py
+├── requirements.txt
 ├── Gestational Diabetic Dat Set.xlsx
+├── Yet_another_copy_of_GDM (1).ipynb
 └── README.md
 ```
 
 ---
 
-## ▶️ How to Run the Project
+## ▶️ Run Locally
 
-### Step 1: Clone the Repository
-
-```bash
-git clone YOUR_GITHUB_REPOSITORY_URL
-```
-
-### Step 2: Open the Project Folder
+### 1. Clone the Repository
 
 ```bash
-cd Gestational-Diabetes-Prediction
+git clone https://github.com/SahithiVIT/Gestational-Diabetes-Risk-Prediction-Using-Ensemble-Machine-Learning-and-Deep-Learning.git
 ```
 
-### Step 3: Install Required Libraries
+### 2. Open the Project Directory
 
 ```bash
-pip install pandas numpy scikit-learn imbalanced-learn matplotlib seaborn xgboost lightgbm catboost openpyxl
+cd Gestational-Diabetes-Risk-Prediction-Using-Ensemble-Machine-Learning-and-Deep-Learning
 ```
 
-### Step 4: Open Jupyter Notebook
+### 3. Install Dependencies
 
 ```bash
-jupyter notebook
+pip install -r requirements.txt
 ```
 
-### Step 5: Run the Notebook
+### 4. Run the Streamlit Application
 
-Open:
-
-```text
-Gestational_Diabetes_Prediction.ipynb
+```bash
+streamlit run app.py
 ```
 
-Run all cells sequentially.
+The application will open in your browser.
 
 ---
 
-## 💻 Run Using Google Colab
+## 🌐 Deployment
 
-1. Open Google Colab.
-2. Upload the `.ipynb` file.
-3. Upload the dataset.
-4. Install the required libraries.
-5. Run all notebook cells.
+The application is deployed using Streamlit Community Cloud.
 
----
+**GitHub Repository:**
 
-## ✨ Key Features
+https://github.com/SahithiVIT/Gestational-Diabetes-Risk-Prediction-Using-Ensemble-Machine-Learning-and-Deep-Learning
 
-* 🤖 Multiple Machine Learning Models
-* 🧠 MLP Neural Network
-* 🔗 Deep Belief Network
-* 🏆 Stacking Ensemble Learning
-* ⚖️ SMOTE Class Balancing
-* 🎯 Feature Selection
-* 🔄 5-Fold Cross Validation
-* 📊 Model Performance Comparison
-* 📈 ROC Curve Analysis
-* 🩺 Real-Time Patient Input Prediction
+**Live Application:**
+
+https://bq6ncgt7rr47yvnyjc8pxn.streamlit.app/
 
 ---
 
 ## 🔮 Future Improvements
 
-* Hyperparameter tuning using GridSearchCV or Bayesian Optimization
-* SHAP or LIME explainability
-* Larger multi-hospital dataset validation
-* Streamlit-based interactive web application
-* Cloud deployment
-* Real-time clinical prediction dashboard
+- Hyperparameter tuning
+- SHAP or LIME model explainability
+- Validation using larger multi-hospital datasets
+- Model versioning and monitoring
+- Improved clinical dashboard
+- Additional patient risk insights
 
 ---
 
 ## ⚠️ Disclaimer
 
-This project is developed for **educational and research purposes only**.
+This project is developed for educational and research purposes only.
 
-The prediction generated by the model should **not be considered a medical diagnosis or a replacement for professional medical advice**.
+The prediction generated by the application should not be considered a medical diagnosis or a replacement for professional medical advice.
 
+---
 
+## 👩‍💻 Author
 
+**Sahithi Pilla**
+
+Computer Science and Engineering  
+VIT-AP University
+
+---
+
+## ⭐ Support
+
+If you find this project useful, consider giving the repository a ⭐ Star.
+
+Contributions, suggestions, and feedback are welcome.
