@@ -1,26 +1,28 @@
 # 🤰 Gestational Diabetes Risk Prediction Using Machine Learning and Deep Learning
 
-An interactive Machine Learning, Deep Learning, and Ensemble Learning project designed to predict the risk of **Gestational Diabetes Mellitus (GDM)** using patient clinical and health-related features.
+An end-to-end **Machine Learning, Deep Learning, and Ensemble Learning project** for predicting the risk of **Gestational Diabetes Mellitus (GDM)** using patient clinical and health-related features.
 
-The project compares multiple classification models and provides a deployed Streamlit web application for interactive patient risk prediction.
+The project compares multiple classification models, a Deep Belief Network (DBN), and a Stacking Ensemble using a leakage-aware machine learning pipeline.
+
+An interactive Streamlit web application is also deployed for real-time GDM risk estimation.
 
 ---
 
 ## 🌐 Live Application
 
-🚀 **Try the deployed GDM Prediction App:**
+🚀 **Try the GDM Risk Prediction App**
 
 https://bq6ncgt7rr47yvnyjc8pxn.streamlit.app/
 
-Users can enter patient clinical details and receive an instant GDM risk prediction.
+The user can enter patient clinical details and receive an estimated GDM risk score.
 
 ---
 
 ## 📌 Project Overview
 
-Gestational Diabetes Mellitus is a condition that can occur during pregnancy and is associated with increased blood glucose levels.
+Gestational Diabetes Mellitus is a condition involving elevated blood glucose levels during pregnancy.
 
-This project analyzes clinical features such as:
+This project analyzes patient clinical features including:
 
 - Age
 - Number of Pregnancies
@@ -38,10 +40,10 @@ This project analyzes clinical features such as:
 - Sedentary Lifestyle
 - Prediabetes
 
-The system predicts:
+The system estimates whether the patient has:
 
-- ⚠️ GDM Detected
-- ✅ No GDM Detected
+- ⚠️ Higher GDM Risk
+- ✅ Lower GDM Risk
 
 ---
 
@@ -54,32 +56,56 @@ Data Shuffling
    ↓
 Feature and Target Separation
    ↓
-Missing Value Imputation
+5-Fold Cross Validation
    ↓
-Feature Standardization
+Imputation
    ↓
-Class Distribution Analysis
+Standardization
    ↓
 SMOTE Class Balancing
    ↓
-Feature Selection
+ANOVA Feature Selection
    ↓
-Machine Learning Model Training
+Machine Learning Models
    ↓
 Deep Learning Models
    ↓
 Stacking Ensemble
    ↓
-5-Fold Cross Validation
+Performance Evaluation
    ↓
-Performance Comparison
+ROC-AUC Analysis
    ↓
-ROC Curve Analysis
+Probability Calibration
    ↓
-Interactive Patient Prediction
+GDM Risk Prediction
    ↓
 Streamlit Deployment
 ```
+
+---
+
+## 🔄 Leakage-Aware Machine Learning Pipeline
+
+The project uses an `imblearn` pipeline to apply preprocessing separately within each cross-validation training fold.
+
+```text
+Training Fold
+     ↓
+Mean Imputation
+     ↓
+StandardScaler
+     ↓
+SMOTE
+     ↓
+SelectKBest
+     ↓
+Model Training
+     ↓
+Validation Fold Evaluation
+```
+
+This approach helps reduce **data leakage** during cross-validation.
 
 ---
 
@@ -88,19 +114,19 @@ Streamlit Deployment
 | Model | Description |
 |---|---|
 | Random Forest | Ensemble of multiple decision trees |
-| Extra Trees | Randomized tree-based ensemble |
-| XGBoost | Optimized gradient boosting algorithm |
-| LightGBM | Fast gradient boosting framework |
+| Extra Trees | Highly randomized tree ensemble |
+| XGBoost | Optimized gradient boosting |
+| LightGBM | Efficient gradient boosting framework |
 | CatBoost | Advanced boosting algorithm |
 | SVM | Support Vector Machine classifier |
 | KNN | K-Nearest Neighbors |
-| Decision Tree | Tree-based classification |
+| Decision Tree | Tree-based classifier |
 | Gradient Boosting | Sequential boosting model |
 | AdaBoost | Adaptive boosting classifier |
-| Logistic Regression | Linear classification model |
+| Logistic Regression | Linear probabilistic classifier |
 | MLP | Multi-Layer Perceptron Neural Network |
 | DBN | Deep Belief Network using stacked RBMs |
-| Stacking Ensemble | RF, Extra Trees and XGBoost ensemble |
+| Stacking Ensemble | RF, Extra Trees, and XGBoost ensemble |
 
 ---
 
@@ -114,7 +140,29 @@ Extra Trees ───────┼──► Logistic Regression ──► Fina
 XGBoost ───────────┘
 ```
 
-The base model predictions are combined using Logistic Regression as the meta-model.
+Random Forest, Extra Trees, and XGBoost are used as base models.
+
+Logistic Regression is used as the meta-model to combine their predictions.
+
+---
+
+## 🧠 MLP Neural Network Architecture
+
+```text
+Input Features
+      ↓
+Hidden Layer - 128 Neurons
+      ↓
+Hidden Layer - 64 Neurons
+      ↓
+Hidden Layer - 32 Neurons
+      ↓
+Output Prediction
+```
+
+The MLP model is used to learn complex nonlinear relationships between patient clinical features and GDM risk.
+
+Early stopping is used to help reduce overfitting.
 
 ---
 
@@ -134,84 +182,145 @@ Logistic Regression
 GDM / Non-GDM
 ```
 
+The Deep Belief Network is implemented using stacked Restricted Boltzmann Machines followed by Logistic Regression.
+
 ---
 
 ## ⚙️ Data Preprocessing
 
-### Missing Value Handling
+### 1. Missing Value Handling
 
 Missing numerical values are handled using Mean Imputation.
 
 ```python
-imputer = SimpleImputer(strategy="mean")
-X = imputer.fit_transform(X)
+SimpleImputer(strategy="mean")
 ```
 
-### Feature Standardization
+---
 
-StandardScaler is used to bring numerical features to a common scale.
+### 2. Feature Standardization
+
+`StandardScaler` transforms numerical features to a common scale.
 
 ```python
-scaler = StandardScaler()
-X = scaler.fit_transform(X)
+StandardScaler()
 ```
 
-### Class Balancing Using SMOTE
+This is useful for models such as:
 
-SMOTE generates synthetic minority-class samples to reduce class imbalance.
+- SVM
+- KNN
+- Logistic Regression
+- MLP
+
+---
+
+### 3. Class Balancing Using SMOTE
+
+SMOTE is used to handle class imbalance.
 
 ```python
-smote = SMOTE(random_state=42)
-X, y = smote.fit_resample(X, y)
+SMOTE(random_state=42)
 ```
 
-### Feature Selection
+SMOTE generates synthetic minority-class samples instead of simply duplicating existing records.
 
-The top 10 informative features are selected using the ANOVA F-test.
+In the model evaluation pipeline, SMOTE is applied to the training fold.
+
+---
+
+### 4. Feature Selection
+
+The top 10 informative features are selected using `SelectKBest`.
 
 ```python
-selector = SelectKBest(score_func=f_classif, k=10)
-X = selector.fit_transform(X, y)
+SelectKBest(
+    score_func=f_classif,
+    k=10
+)
 ```
+
+The ANOVA F-test is used to measure the relationship between each feature and the target class.
 
 ---
 
 ## 📊 Model Evaluation
 
-Models are evaluated using 5-Fold Cross Validation.
+The models are evaluated using **5-Fold Cross Validation**.
 
-The evaluation metrics include:
+The following metrics are compared:
 
 | Metric | Purpose |
 |---|---|
 | Accuracy | Overall prediction correctness |
-| Precision | Accuracy of positive predictions |
-| Recall | Ability to identify GDM cases |
+| Precision | Correctness of positive predictions |
+| Recall | Ability to identify positive GDM cases |
 | F1 Score | Balance between precision and recall |
-| ROC-AUC | Overall classification discrimination |
+| ROC-AUC | Ability to distinguish between classes |
 
-Recall is particularly important in risk-screening applications because missed positive cases may require further attention.
+Recall is an important metric in risk-screening applications because missed positive cases may require further clinical attention.
 
 ---
 
-## 📈 Performance Analysis
+## 📈 Performance Comparison
 
-The project compares models using:
+The project generates model comparison visualizations for:
 
 - Accuracy
 - Precision
 - Recall
 - F1 Score
 - ROC-AUC
-- ROC Curve
 
-These metrics help compare the predictive performance of different models.
+A ROC curve is also generated for the Stacking Ensemble model.
 
 ---
 
-## 🌐 Interactive Streamlit Web Application
+## 📈 ROC Curve
 
-The trained prediction pipeline is integrated into an interactive Streamlit application.
+The ROC curve compares:
+
+```text
+True Positive Rate
+        VS
+False Positive Rate
+```
+
+The Area Under the Curve (AUC) measures the model's ability to distinguish between GDM and Non-GDM classes.
+
+A higher AUC generally indicates better class discrimination.
+
+---
+
+## 🎯 Probability Calibration
+
+The final MLP prediction pipeline uses probability calibration.
+
+```python
+CalibratedClassifierCV(
+    final_mlp_pipeline,
+    method="sigmoid",
+    cv=5
+)
+```
+
+Probability calibration is used to obtain more stable model probability estimates.
+
+The final output is displayed as an estimated GDM risk score.
+
+Example:
+
+```text
+Estimated GDM Risk Score: 24.50%
+
+Result: Lower GDM Risk
+```
+
+---
+
+## 🌐 Interactive Streamlit Application
+
+The project includes an interactive Streamlit web application.
 
 ### Application Flow
 
@@ -220,18 +329,20 @@ User Opens Web Application
           ↓
 Enters Patient Details
           ↓
-Clicks "Predict GDM"
+Clicks Predict GDM
           ↓
 Data Preprocessing
           ↓
-MLP Neural Network
+Trained Prediction Model
           ↓
-GDM Risk Prediction
+Probability Estimation
           ↓
-Prediction Result Displayed
+GDM Risk Score
+          ↓
+Higher / Lower GDM Risk
 ```
 
-### Live App
+### Live Application
 
 https://bq6ncgt7rr47yvnyjc8pxn.streamlit.app/
 
@@ -240,16 +351,18 @@ https://bq6ncgt7rr47yvnyjc8pxn.streamlit.app/
 ## ✨ Key Features
 
 - Multiple Machine Learning Model Comparison
-- MLP Neural Network
-- Deep Belief Network
+- Deep Learning using MLP
+- Deep Belief Network using RBMs
 - Stacking Ensemble Learning
+- Leakage-Aware Preprocessing Pipeline
 - SMOTE Class Balancing
 - ANOVA-Based Feature Selection
 - 5-Fold Cross Validation
-- ROC-AUC Evaluation
+- Multiple Evaluation Metrics
+- ROC-AUC Analysis
+- Probability Calibration
 - Interactive Patient Input
-- GDM Risk Probability
-- Real-Time Prediction
+- GDM Risk Score Estimation
 - Streamlit Web Deployment
 
 ---
@@ -260,7 +373,7 @@ https://bq6ncgt7rr47yvnyjc8pxn.streamlit.app/
 
 - Python
 
-### Machine Learning
+### Machine Learning and Deep Learning
 
 - Scikit-learn
 - Imbalanced-learn
@@ -276,7 +389,6 @@ https://bq6ncgt7rr47yvnyjc8pxn.streamlit.app/
 ### Data Visualization
 
 - Matplotlib
-- Seaborn
 
 ### Web Application
 
@@ -284,8 +396,8 @@ https://bq6ncgt7rr47yvnyjc8pxn.streamlit.app/
 
 ### Development Tools
 
-- Jupyter Notebook
 - Google Colab
+- Jupyter Notebook
 - GitHub
 
 ---
@@ -298,13 +410,13 @@ Gestational-Diabetes-Risk-Prediction/
 ├── app.py
 ├── requirements.txt
 ├── Gestational Diabetic Dat Set.xlsx
-├── Yet_another_copy_of_GDM (1).ipynb
+├── Gestational_Diabetes_Risk_Prediction.ipynb
 └── README.md
 ```
 
 ---
 
-## ▶️ Run Locally
+## ▶️ Run the Project Locally
 
 ### 1. Clone the Repository
 
@@ -330,19 +442,17 @@ pip install -r requirements.txt
 streamlit run app.py
 ```
 
-The application will open in your browser.
-
 ---
 
 ## 🌐 Deployment
 
-The application is deployed using Streamlit Community Cloud.
+The interactive application is deployed using Streamlit Community Cloud.
 
-**GitHub Repository:**
+### GitHub Repository
 
 https://github.com/SahithiVIT/Gestational-Diabetes-Risk-Prediction-Using-Ensemble-Machine-Learning-and-Deep-Learning
 
-**Live Application:**
+### Live Application
 
 https://bq6ncgt7rr47yvnyjc8pxn.streamlit.app/
 
@@ -350,34 +460,19 @@ https://bq6ncgt7rr47yvnyjc8pxn.streamlit.app/
 
 ## 🔮 Future Improvements
 
-- Hyperparameter tuning
+- Hyperparameter tuning using GridSearchCV or Bayesian Optimization
 - SHAP or LIME model explainability
-- Validation using larger multi-hospital datasets
-- Model versioning and monitoring
-- Improved clinical dashboard
+- External validation using larger datasets
+- Multi-hospital dataset validation
+- Model monitoring and versioning
+- Improved clinical risk dashboard
 - Additional patient risk insights
 
 ---
 
 ## ⚠️ Disclaimer
 
-This project is developed for educational and research purposes only.
+This project is developed for **educational and research purposes only**.
 
-The prediction generated by the application should not be considered a medical diagnosis or a replacement for professional medical advice.
+The generated risk score is a model-based estimate and should **not be considered a medical diagnosis or a replacement for professional medical advice**.
 
----
-
-## 👩‍💻 Author
-
-**Sahithi Pilla**
-
-Computer Science and Engineering  
-VIT-AP University
-
----
-
-## ⭐ Support
-
-If you find this project useful, consider giving the repository a ⭐ Star.
-
-Contributions, suggestions, and feedback are welcome.
